@@ -1,0 +1,73 @@
+例子  根据值，符合条件来进行分配经办人
+//根据部门及分支机构中的值，如果是预算财务部，就分配给部门签收人(隐藏)
+import com.atlassian.jira.ComponentManager
+import com.atlassian.jira.issue.Issue
+import com.atlassian.jira.issue.CustomFieldManager
+import com.atlassian.jira.issue.IssueManager
+import com.atlassian.jira.issue.ModifiedValue
+import com.atlassian.jira.issue.MutableIssue
+import com.atlassian.jira.issue.fields.CustomField
+import com.atlassian.jira.component.ComponentAccessor
+import com.atlassian.jira.issue.fields.layout.field.FieldLayoutItem
+import com.atlassian.jira.issue.util.DefaultIssueChangeHolder
+import com.atlassian.crowd.embedded.api.User
+import com.atlassian.jira.util.JiraUtils
+import com.atlassian.jira.workflow.WorkflowTransitionUtil
+import com.atlassian.jira.workflow.WorkflowTransitionUtilImpl
+import com.atlassian.jira.user.util.UserManager
+import com.atlassian.jira.issue.IssueManager
+import com.atlassian.jira.issue.MutableIssue
+import com.atlassian.jira.issue.Issue
+import com.atlassian.jira.ComponentManager
+import com.atlassian.jira.issue.CustomFieldManager
+import com.atlassian.jira.event.type.EventDispatchOption
+import com.atlassian.jira.user.ApplicationUsers
+ 
+//def userManager = ComponentAccessor.getUserManager()
+//User yxj = userManager.getUser("test")
+def jiraAuth = ComponentManager.getInstance().getJiraAuthenticationContext()
+def yxj = jiraAuth.getUser()
+
+
+//IssueManager issueManager = ComponentManager.getInstance().getIssueManager();
+//Issue issue = issueManager.getIssueObject( "CSXM-5" );
+assert(issue!=null)
+
+
+CustomFieldManager customFieldManager = ComponentManager.getInstance().getCustomFieldManager()
+
+
+//CustomField srcField = customFieldManager.getCustomFieldObjects(issue).find {it.name == "customfield1"}
+
+//CustomField customField = customFieldManager.getCustomFieldObjectByName("部门签字人")
+
+    //判断当前部门及分支机构
+    CustomField changeType = customFieldManager.getCustomFieldObjectByName("部门及分支机构");
+    CustomField changeType03 = customFieldManager.getCustomFieldObjectByName("部门签收人");
+     
+    log.setLevel(org.apache.log4j.Level.DEBUG)
+        log.debug "debug statements"    
+    if(changeType!=null){
+             Object changeType01 = issue.getCustomFieldValue(changeType).toString();
+             String changeType02 ="预算财务部";
+             int a=changeType01.indexOf(changeType02);
+              //判断部门及分支机构的值是否是预算财务部
+             if(a>0){
+               // CustomField sccField = ComponentManager.getInstance().getCustomFieldManager().getCustomFieldObjectByName("部门签收人(隐藏)");
+
+                    
+                        //  MutableIssue myIssue = issue;
+                        // IssueManager issueManager = ComponentAccessor.getIssueManager();
+                       //UserManager userManager = ComponentAccessor.getUserManager();
+                       //myIssue.setCustomFieldValue(reviewerCustomField, assignee);
+                      // issueManager.updateIssue(userManager.getUser("wangyh"), myIssue, EventDispatchOption.DO_NOT_DISPATCH, false);
+                      
+                         //分配经办人
+                        cfParent = customFieldManager.getCustomFieldObjectByName('部门签收人(隐藏)');//当前是自定义字段，可以给这个字段分配一个具体的用户，比如testuser
+                        parentMyFieldValue = transientVars["issue"].getCustomFieldValue(cfParent);
+                        issue.setAssignee(ApplicationUsers.toDirectoryUser(parentMyFieldValue));
+                    
+             }
+    }
+
+
