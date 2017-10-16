@@ -1,0 +1,83 @@
+例子五  校验判断是否选择了XXXX任务（链接的问题——系统字段）
+ /**
+*判断是否选择了XXXX任务
+*/
+import com.atlassian.jira.component.ComponentAccessor;
+import com.atlassian.jira.ComponentManager;
+import com.atlassian.jira.issue.IssueFieldConstants;
+import com.atlassian.jira.issue.fields.IssueLinksSystemField;
+import com.opensymphony.workflow.InvalidInputException;
+import com.atlassian.jira.issue.Issue;
+import com.atlassian.jira.issue.issuetype.IssueType;
+import com.atlassian.jira.issue.IssueManager;
+import webwork.action.ActionContext;
+
+import java.util.List;
+IssueManager issueManager = ComponentManager.getInstance().getIssueManager();
+def fieldManager = ComponentAccessor.getFieldManager();
+def linksSystemField = fieldManager.getField("issuelinks") as IssueLinksSystemField;
+
+def request = ActionContext.getRequest();
+if (request) {
+    def params = request.getParameterMap();
+    def issueLinkingValue = linksSystemField.getRelevantParams(params) as IssueLinksSystemField.IssueLinkingValue;
+    List<String> linkedIssueIds = issueLinkingValue.getLinkedIssues();
+    boolean flag = false;
+    int count = 0;
+    for(String linkedIssueId:linkedIssueIds){
+        Issue linkedIssue = issueManager.getIssueObject(linkedIssueId);
+        IssueType issueType = linkedIssue.getIssueTypeObject();
+        String issueTypeName = issueType.getName();
+        if("XXXX任务".equals(issueTypeName)){
+            count++;
+            flag = true;
+        }
+    }
+    if(!flag){
+        throw new InvalidInputException(IssueFieldConstants.ISSUE_LINKS,
+            "请选择关联的XXXX任务！");
+    }
+    if(issueLinkingValue.linkDescription != "relates to"){
+        throw new InvalidInputException(IssueFieldConstants.ISSUE_LINKS,
+            "需要以relates to方式关联XXXX任务！");
+    }
+    if(count>1){
+        throw new InvalidInputException(IssueFieldConstants.ISSUE_LINKS,
+            "只能关联一个xxxx任务！");
+    }
+}
+例子六  校验  获取自定义字段，根据其中的值判断阻止操作 
+/**
+*判断是否选择重要程度
+*/
+import com.atlassian.jira.component.ComponentAccessor;
+import com.atlassian.jira.ComponentManager;
+import com.atlassian.jira.issue.IssueFieldConstants;
+import com.atlassian.jira.issue.fields.IssueLinksSystemField;
+import com.opensymphony.workflow.InvalidInputException;
+import com.atlassian.jira.issue.Issue;
+import com.atlassian.jira.issue.issuetype.IssueType;
+import com.atlassian.jira.issue.IssueManager;
+import com.atlassian.jira.issue.fields.FieldManager;
+import com.atlassian.jira.issue.CustomFieldManager;
+import com.atlassian.jira.issue.fields.CustomField;
+import webwork.action.ActionContext;
+
+import java.util.List;
+
+IssueManager issueManager = ComponentManager.getInstance().getIssueManager();
+FieldManager fieldManager = ComponentManager.getInstance().getFieldManager();
+CustomFieldManager customFieldManager = ComponentManager.getInstance().getCustomFieldManager();
+
+
+    //判断当前变更类型
+    CustomField changeType = customFieldManager.getCustomFieldObjectByName("重要程度");//获取重要程度自定义字段
+    if(changeType!=null){
+             Object changeType01 = issue.getCustomFieldValue(changeType).toString();//获取其中的值，值为"重大"时，则当前操作不被允许
+              if("重大".equals(changeType01)){
+                    throw new InvalidInputException("当前任务为紧急状态,该操作不被准许！");
+             }
+             }
+    }
+
+
