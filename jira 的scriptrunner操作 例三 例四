@@ -1,0 +1,84 @@
+例子三   有些需要从连接的问题中复制字段到当前任务
+//从选择的用户需求中拷贝以下字段:
+//摘要
+//需求简要说明
+import com.atlassian.jira.ComponentManager;
+import com.atlassian.jira.issue.Issue;
+import com.atlassian.jira.issue.issuetype.IssueType;
+import com.atlassian.jira.issue.IssueManager;
+import com.atlassian.jira.issue.fields.FieldManager;
+import com.atlassian.jira.issue.CustomFieldManager;
+import com.atlassian.jira.issue.fields.IssueLinksSystemField;
+import com.atlassian.jira.issue.fields.CustomField;
+import java.util.List;
+import webwork.action.ActionContext;
+
+import webwork.action.ActionContext;
+
+IssueManager issueManager = ComponentManager.getInstance().getIssueManager();
+FieldManager fieldManager = ComponentManager.getInstance().getFieldManager();
+CustomFieldManager customFieldManager = ComponentManager.getInstance().getCustomFieldManager();
+
+IssueLinksSystemField linksSystemField = fieldManager.getField("issuelinks");//链接的问题字段
+
+
+def request = ActionContext.getRequest();
+if (request) {
+    def params = request.getParameterMap();
+    def issueLinkingValue = linksSystemField.getRelevantParams(params) as IssueLinksSystemField.IssueLinkingValue;
+    
+    List<String> linkedIssueIds = issueLinkingValue.getLinkedIssues();
+    Issue linkIssue = null;
+    for(String linkedIssueId:linkedIssueIds){
+        Issue linkedIssue = issueManager.getIssueObject(linkedIssueId);
+        IssueType issueType = linkedIssue.getIssueTypeObject();
+        String issueTypeName = issueType.getName();
+
+        //链接的问题类型
+
+        if("用户需求".equals(issueTypeName)){
+            linkIssue = linkedIssue;
+        }
+    }
+    if(linkIssue != null){
+
+        CustomField briefDescription = customFieldManager.getCustomFieldObjectByName("需求简要说明");//拿到的自定义字段
+        issue.setCustomFieldValue(briefDescription, linkIssue.getCustomFieldValue(briefDescription));//赋值到当前任务
+    }
+}
+例子三  子任务从父级任务中获取相关字段
+        类似案列二，只是获取的问题变成父任务了
+ //系统集成测试_系统集成测试子任务
+//从选择的系统集成测试任务中拷贝一下字段:
+//需求提交人
+//预计系统集成测试开始日期
+import com.atlassian.jira.ComponentManager;
+import com.atlassian.jira.issue.Issue;
+import com.atlassian.jira.issue.issuetype.IssueType;
+import com.atlassian.jira.issue.IssueManager;
+import com.atlassian.jira.issue.fields.FieldManager;
+import com.atlassian.jira.issue.CustomFieldManager;
+import com.atlassian.jira.issue.fields.IssueLinksSystemField;
+import com.atlassian.jira.issue.fields.CustomField;
+import java.util.List;
+
+import java.util.Date;
+import java.sql.Timestamp;
+import webwork.action.ActionContext;
+
+IssueManager issueManager = ComponentManager.getInstance().getIssueManager();
+FieldManager fieldManager = ComponentManager.getInstance().getFieldManager();
+CustomFieldManager customFieldManager = ComponentManager.getInstance().getCustomFieldManager();
+
+//IssueLinksSystemField linksSystemField = fieldManager.getField("issuelinks");//链接的问题字段
+    Issue  pIssue =  issue.getParentObject();//获取父任务
+ 
+  if(pIssue!=null){
+        CustomField reqPerson= customFieldManager.getCustomFieldObjectByName("需求提交人");
+        issue.setCustomFieldValue(reqPerson, pIssue.getCustomFieldValue(reqPerson));
+        //这里因为两个问题中的自定义字段不同，所以需要进行分别获取到后，进行赋值，如果两个问题的自定义字段是相同的，就不要这么赋值了，同上面的一样
+        CustomField planSysTestStartDate = customFieldManager.getCustomFieldObjectByName("预计系统集成测试开始日期");
+        CustomField sysTestStartDate = customFieldManager.getCustomFieldObjectByName("系统集成测试开始日期");
+        issue.setCustomFieldValue(sysTestStartDate, pIssue.getCustomFieldValue(planSysTestStartDate));
+    
+  }
