@@ -1,0 +1,11 @@
+参考例子地址：https://jamieechlin.atlassian.net/wiki/pages/viewpage.action?pageId=57999378#ScriptedJQLFunctions-MoreComplexExamples
+主要是涉及到  issueFunction  in  (scriptrunner提供的一些jql函数方法)
+具体请看文档，上面例子都有的。
+待我关闭的用户需求
+要求是：
+
+其中关联的问题     还有问题号，摘要等定制字段
+定制字段可以通过  jira的定制列功能实现。
+jql语句：cf[10606] in (currentUser()) AND issuetype = 用户需求 AND resolution is not EMPTY AND issueFunction in linkedIssuesOf("status !=closed", "relates to")
+cf为自定义字段的编号  对应要求的字段“需求分析人员”，currentUser() 是当前用户 ，issueFunction in linkedIssuesOf("status !=closed", "relates to")是指已relates to方式链接的问题状态为关闭。
+cf的这种写法是参考的jira提供的语法帮助。如图示，jira的过滤器语法就在里面。
