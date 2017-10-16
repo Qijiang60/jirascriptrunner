@@ -1,0 +1,111 @@
+from threading import Thread
+from com.atlassian.jira import ComponentManager
+
+currentUser = ComponentManager.getInstance().getJiraAuthenticationContext().getUser()
+
+def threadedCreate(issue, currentUser):
+  from com.atlassian.jira import ComponentManager
+  from com.atlassian.jira.util import ImportUtils
+  from com.atlassian.jira import ManagerFactory
+  
+  issueGv = issue.getGenericValue()
+  issueFactory = ComponentManager.getInstance().getIssueFactory()
+  issueManager = ComponentManager.getInstance().getIssueManager()
+  subTaskManager = ComponentManager.getInstance().getSubTaskManager()
+  customFieldManager = ComponentManager.getInstance().getCustomFieldManager()
+  indexManager = ComponentManager.getInstance().getIndexManager()
+
+  issueObject = issueFactory.getIssue()
+  issueObject.setProjectId(issue.getProjectObject().getId())
+  issueObject.setIssueTypeId('5')
+  issueObject.setReporter(currentUser)
+  issueObject.setPriorityId(issue.getPriorityObject().getId())
+  issueObject.setSummary(issue.getSummary()+" - "+u"задача для АХО")
+  issueObject.setDescription(u"Нужно подготовить рабочее место для нового сотрудника.(Стол, стул, тумбочка)")
+  
+  params = {'issue': issueObject}
+  subtaskGv = issueManager.createIssue(currentUser, params)
+  
+  subTaskManager.createSubTaskIssueLink(issueGv, subtaskGv, currentUser)
+  
+  ImportUtils.setIndexIssues(True)
+  indexManager.reIndex(subtaskGv)
+  ImportUtils.setIndexIssues(False)
+
+#Задача для Сисадминов
+
+  issueObjectSA = issueFactory.getIssue()
+  issueObjectSA.setProjectId(issue.getProjectObject().getId())
+  issueObjectSA.setIssueTypeId('5')
+  issueObjectSA.setReporter(currentUser)
+  issueObjectSA.setPriorityId(issue.getPriorityObject().getId())
+  issueObjectSA.setSummary(issue.getSummary()+" - "+u"задача для Сисадминов")
+  issueObjectSA.setDescription(u"Нужно подготовить рабочее место для нового сотрудника.")
+  
+  params = {'issue': issueObjectSA}
+  subtaskGv = issueManager.createIssue(currentUser, params)
+  
+  subTaskManager.createSubTaskIssueLink(issueGv, subtaskGv, currentUser)
+  
+  ImportUtils.setIndexIssues(True)
+  indexManager.reIndex(srvIssueGv)
+  ImportUtils.setIndexIssues(False)
+  
+#Задача для СБ
+  
+  issueObjectSS = issueFactory.getIssue()
+  issueObjectSS.setProjectId(issue.getProjectObject().getId())
+  issueObjectSS.setIssueTypeId('5')
+  issueObjectSS.setReporter(currentUser)
+  issueObjectSS.setPriorityId(issue.getPriorityObject().getId())
+  issueObjectSS.setSummary(issue.getSummary()+" - "+u"задача для СБ")
+  issueObjectSS.setDescription(u".")
+  
+  params = {'issue': issueObjectSS}
+  subtaskGv = issueManager.createIssue(currentUser, params)
+  
+  subTaskManager.createSubTaskIssueLink(issueGv, subtaskGv, currentUser)
+  
+  ImportUtils.setIndexIssues(True)
+  indexManager.reIndex(srvIssueGv)
+  ImportUtils.setIndexIssues(False)
+  
+#Welcome letter
+
+  issueObjectWL = issueFactory.getIssue()
+  issueObjectWL.setProjectId(issue.getProjectObject().getId())
+  issueObjectWL.setIssueTypeId('5')
+  issueObjectWL.setReporter(currentUser)
+  issueObjectWL.setPriorityId(issue.getPriorityObject().getId())
+  issueObjectWL.setSummary(issue.getSummary()+" - "+u"Welcome letter")
+  issueObjectWL.setDescription(u"Выслать сотруднику Welcome letter")
+  
+  params = {'issue': issueObjectWL}
+  subtaskGv = issueManager.createIssue(currentUser, params)
+  
+  subTaskManager.createSubTaskIssueLink(issueGv, subtaskGv, currentUser)
+  
+  ImportUtils.setIndexIssues(True)
+  indexManager.reIndex(srvIssueGv)
+  ImportUtils.setIndexIssues(False)
+  
+#Sys
+
+  issueObjectSYS = issueFactory.getIssue()
+  issueObjectSYS.setProjectId(issue.getProjectObject().getId())
+  issueObjectSYS.setIssueTypeId('5')
+  issueObjectSYS.setReporter(currentUser)
+  issueObjectSYS.setPriorityId(issue.getPriorityObject().getId())
+  issueObjectSYS.setSummary(issue.getSummary()+" - "+u"SYS")
+  issueObjectSYS.setDescription(u"Завести сотрудника в Sys")
+  
+  params = {'issue': issueObjectSYS}
+  subtaskGv = issueManager.createIssue(currentUser, params)
+  
+  subTaskManager.createSubTaskIssueLink(issueGv, subtaskGv, currentUser)
+  
+  ImportUtils.setIndexIssues(True)
+  indexManager.reIndex(srvIssueGv)
+  ImportUtils.setIndexIssues(False)
+  
+Thread(target=threadedCreate, args=(issue, currentUser)).start()
