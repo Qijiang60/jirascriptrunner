@@ -1,0 +1,6 @@
+ScriptRunner插件极大扩展了jira的功能，但是脚本在后台运行，往往调试较为困难，看不到输出，出了问题之后很难查找错误所在，其实可以在脚本中加日志输出，然后查看日志文件，这样可以方便地查找错误，如下：
+log.setLevel(org.apache.log4j.Level.DEBUG)
+log.debug "debug statements"
+那日志又在哪里可以看到呢？在这个地方：
+jira安装目录\Application Data\JIRA\log\atlassian-jira.log
+jira运行过程中的所有日志都在这个地方。
